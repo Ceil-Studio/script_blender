@@ -12,7 +12,7 @@ for obj in scene.objects:
             bpy.context.view_layer.objects.active = armature
             bpy.ops.object.mode_set(mode='POSE')
 
-            # Obtenir les os sélectionnés via context
+            # Obtenir les os sélectionnés via context (plus fiable que .bone.select)
             selected_bones = [b.name for b in bpy.context.selected_pose_bones]
 
             # Obtenir l'os actif
@@ -43,20 +43,10 @@ for obj in scene.objects:
 
                         print(f"FUSION → {bone_name} → {active_bone.name}")
 
-                        # CLEAN du vertex group source
+                        # CLEAN du vertex group source (ne supprime pas l’os)
                         if bone_name in obj.vertex_groups:
                             obj.vertex_groups.remove(obj.vertex_groups[bone_name])
                             print(f"CLEAN weights du groupe : {bone_name}")
-
-                # --- SUPPRIMER LES BONES SOURCE (sauf l'actif) ---
-                bpy.context.view_layer.objects.active = armature
-                bpy.ops.object.mode_set(mode='EDIT')
-                edit_bones = armature.data.edit_bones
-                for bone_name in selected_bones:
-                    if bone_name != active_bone.name and bone_name in edit_bones:
-                        edit_bones.remove(edit_bones[bone_name])
-                        print(f"Bone supprimé : {bone_name}")
-                bpy.ops.object.mode_set(mode='POSE')
 
             else:
                 print("Veuillez sélectionner un os actif et au moins un autre os.")
