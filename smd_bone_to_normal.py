@@ -8,6 +8,11 @@ src_obj = bpy.context.object
 if not src_obj or src_obj.type != 'ARMATURE':
     raise Exception("Sélectionne une armature SMD")
 
+# On passe en mode EDIT sur la source pour récupérer les rolls exacts
+bpy.context.view_layer.objects.active = src_obj
+bpy.ops.object.mode_set(mode='EDIT')
+# Dictionnaire pour stocker les rolls { "nom_os": valeur_roll }
+original_rolls = {b.name: b.roll for b in src_obj.data.edit_bones}
 bpy.ops.object.mode_set(mode='OBJECT')
 
 # -----------------------------
@@ -66,13 +71,13 @@ for b in src_bones:
         nb.tail = nb.head + Vector((0, DEFAULT_LEN, 0))
 
 # -----------------------------
-# ROLL RECALCULATION
+# ROLL CONSERVATION (CORRIGÉ)
 # -----------------------------
-bpy.ops.object.mode_set(mode='OBJECT')
-bpy.context.view_layer.objects.active = arm_obj
-bpy.ops.object.mode_set(mode='EDIT')
-bpy.ops.armature.calculate_roll(type='GLOBAL_POS_Y')
+# Au lieu de recalculer, on applique les valeurs stockées
+for b_name, roll_val in original_rolls.items():
+    if b_name in dst_bones:
+        dst_bones[b_name].roll = roll_val
 
 bpy.ops.object.mode_set(mode='OBJECT')
 
-print("Armature propre générée : Armature_Clean")
+print("Armature propre générée avec Rolls conservés : Armature_Clean")
